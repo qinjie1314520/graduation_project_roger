@@ -1,0 +1,27 @@
+
+
+spring:
+  application:
+    name: graduation-project-roger-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true  #\u8868\u660Egateway\u5F00\u542F\u670D\u52A1\u6CE8\u518C\u548C\u53D1\u73B0\u7684\u529F\u80FD\uFF0C\u5E76\u4E14spring cloud gateway\u81EA\u52A8\u6839\u636E\u670D\u52A1\u53D1\u73B0\u4E3A\u6BCF\u4E00\u4E2A\u670D\u52A1\u521B\u5EFA\u4E86\u4E00\u4E2Arouter\uFF0C\u8FD9\u4E2Arouter\u5C06\u4EE5\u670D\u52A1\u540D\u5F00\u5934\u7684\u8BF7\u6C42\u8DEF\u5F84\u8F6C\u53D1\u5230\u5BF9\u5E94\u7684\u670D\u52A1\u3002
+          lowerCaseServiceId: true   #\u662F\u5C06\u8BF7\u6C42\u8DEF\u5F84\u4E0A\u7684\u670D\u52A1\u540D\u914D\u7F6E\u4E3A\u5C0F\u5199\uFF08\u56E0\u4E3A\u670D\u52A1\u6CE8\u518C\u7684\u65F6\u5019\uFF0C\u5411\u6CE8\u518C\u4E2D\u5FC3\u6CE8\u518C\u65F6\u5C06\u670D\u52A1\u540D\u8F6C\u6210\u5927\u5199\u7684\u4E86\uFF09\uFF0C\u6BD4\u5982\u4EE5/service-hi/*\u7684\u8BF7\u6C42\u8DEF\u5F84\u88AB\u8DEF\u7531\u8F6C\u53D1\u5230\u670D\u52A1\u540D\u4E3Aservice-hi\u7684\u670D\u52A1\u4E0A\u3002
+          filters:
+             #\u4E0D\u53BB\u6389\u524D\u7F00
+            - StripPrefix=0
+      #\u524D\u7F00
+#      routes:
+#        - id: graduation-project-roger-authority
+#          uri: lb://graduation-project-roger-authority
+#          #\u6307\u5B9A\u4E8B\u65F6\u95F4\u540E\u670D\u52A1\uFF0CBefore\uFF0CBetween
+#          predicates:
+#            - Path=/graduation-project-roger-authority/**
+#            - After=2021-11-07T01:01:01+08:00[Asia/Shanghai]
+    nacos:
+      discovery:
+        server-addr: 180.102.132.35:10001
+      config:
+        server-addr: 180.102.132.35:10001

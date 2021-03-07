@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.authority.mapper.UserMapper">
+  <select id="selUserOneByEmail" resultMap="selUserOneByEmail">
+    select id, username, password, salt, phone, email,role_id from graduation_role_authority,graduation_user_role where email = #{email} and id = user_id
+  </select>
+  <select id="selUserOneByAccount" resultMap="selUserOneByEmail">
+    select id, username, password, salt, phone, email,role_id from graduation_user,graduation_user_role where account = #{username} and id = user_id
+  </select>
+  <resultMap id="selUserOneByEmail" type="com.authority.entity.User">
+    <id column="id" property="uId"/>
+    <result column="username" property="uUsername"/>
+    <result column="password" property="uPassword"/>
+    <result column="salt" property="uSalt"/>
+    <result column="phone" property="uPhone"/>
+    <result column="email" property="uEmail"/>
+
+      <collection property="uRoleIds" ofType="java.lang.Long">
+        <result column="role_id"/>
+      </collection>
+  </resultMap>
+
+
+  <select id="selRoleAuthorities" resultType="com.model.entity.GraduationAuthority">
+    select id, url, name, layer, pid from graduation_role_authority,graduation_authority where role_id = #{roleId} and authority_id = id
+  </select>
+</mapper>

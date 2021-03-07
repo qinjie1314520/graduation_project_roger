@@ -1,0 +1,386 @@
+<article class="baidu_pl">
+ <div id="article_content" class="article_content clearfix">
+  <link rel="stylesheet"
+        href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-b5506197d8.css">
+  <div id="content_views" class="markdown_views prism-atom-one-dark">
+   <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block"
+          style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+   </svg>
+   <blockquote>
+    <p>最近在整理Java的知识点&#xff0c;这篇文章讲解枚举的使用和原理&#xff0c;希望可以帮助到大家&#xff0c;也希望能得到大家的支持和关注。本文章原创&#xff0c;转载请说明出处。
+    </p>
+   </blockquote>
+   <p></p>
+   <div class="toc">
+    <h3>文章目录</h3>
+    <ul>
+     <li><a href="#1__3">1. 为什么需要枚举</a></li>
+     <li><a href="#2__22">2. 枚举类型的特性和使用</a></li>
+     <li>
+      <ul>
+       <li><a href="#21__23">2.1. 定义枚举</a></li>
+       <li><a href="#22__42">2.2. 枚举特性--定义实例变量、实例代码块、实例方法和构造方法</a></li>
+       <li><a href="#23__77">2.3. 枚举特性--定义静态变量、静态代码块以及静态方法</a></li>
+       <li><a href="#24__79">2.4.
+        枚举特性--枚举不能继承其他类或枚举&#xff0c;也不可以被继承&#xff0c;但是可以实现接口</a></li>
+       <li><a href="#25_switch_81">2.5. 枚举特性--可以用作switch语句</a></li>
+       <li><a href="#26_enum_85">2.6. 枚举特性--enum不可以作为数据类型</a></li>
+       <li><a href="#27_enum_96">2.7. 枚举特性--enum可以声明抽象方法</a></li>
+       <li><a href="#28__134">2.8. 枚举的常用方法</a></li>
+       <li><a href="#29__152">2.9. 枚举的常用工具类库</a></li>
+      </ul>
+     </li>
+     <li><a href="#3__172">3. 枚举的实现原理</a></li>
+     <li><a href="#4__323">4. 参考文章</a></li>
+    </ul>
+   </div>
+   <p></p>
+   <h1><a id="1__3"></a>1. 为什么需要枚举</h1>
+   <p>在JDK1.5之前&#xff0c;我们要是想定义一些有关常量的内容&#xff0c;例如定义几个常量&#xff0c;表示从周一到周末&#xff0c;一般都是在一个类&#xff0c;或者一个接口中&#xff0c;写类似于如下代码&#xff1a;
+   </p>
+   <pre><code class="prism language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">WeekDayConstant</span> <span class="token punctuation">{<!-- --></span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> MONDAY <span class="token operator">&#61;</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> TUESDAY <span class="token operator">&#61;</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> WEDNESDAY <span class="token operator">&#61;</span> <span class="token number">2</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token keyword">int</span> THURSDAY <span class="token operator">&#61;</span> <span class="token number">3</span><span class="token punctuation">;</span>
+    <span class="token comment">//...</span>
+<span class="token punctuation">}</span>
+</code></pre>
+   <p>这样做也可以实现功能&#xff0c;有几个缺点&#xff1a;</p>
+   <ul>
+    <li>各个常量的值可能会一样&#xff0c;出现混淆&#xff0c;例如不小心把TUESDAY 定义为0</li>
+    <li>使用起来并不是很方便&#xff0c;例如想要获取某一种枚举的所有枚举值列表&#xff0c;根名称获取值等&#xff0c;还要去编码实现</li>
+    <li>并不是很安全&#xff0c;例如反射修改常量的值&#xff0c;MONDAY 的值可能被修改为1</li>
+    <li>方式并不是很优雅</li>
+   </ul>
+   <p>为了不重复造轮子&#xff0c;Java组织在JDK1.5的时候&#xff0c;引入了枚举<code>enum</code>关键字(enum就是enumeration的缩写)&#xff0c;我们可以定义枚举类型。
+   </p>
+   <h1><a id="2__22"></a>2. 枚举类型的特性和使用</h1>
+   <h2><a id="21__23"></a>2.1. 定义枚举</h2>
+   <p>定义的格式是&#xff1a;</p>
+   <pre><code class="prism language-java">访问修饰符 <span class="token keyword">enum</span> 枚举类型名称<span class="token punctuation">{<!-- --></span>
+一个或多个枚举值定义&#xff0c;一般采用大写加下划线的方式&#xff0c;用英文逗号分隔&#xff0c;例如&#xff0c;
+A<span class="token punctuation">,</span>B<span class="token punctuation">,</span>C<span class="token punctuation">;</span>
+在最后一个枚举值后面建议加一个分号<span class="token punctuation">,</span>对于与只有枚举值的枚举定义来说&#xff0c;可以没有分号
+后面就是一些方法的定义
+<span class="token punctuation">}</span>
+</code></pre>
+   <p>例如&#xff0c;周一到周末的枚举定义&#xff1a;</p>
+   <pre><code class="prism language-java"><span class="token keyword">public</span> <span class="token keyword">enum</span> WeekDay <span class="token punctuation">{<!-- --></span>
+    MONDAY<span class="token punctuation">,</span>TUESDAY<span class="token punctuation">,</span>WEDNESDAY<span class="token punctuation">,</span>THURSDAY<span class="token punctuation">,</span>FRIDAY<span class="token punctuation">,</span>SATURDAY<span class="token punctuation">,</span>SUNDAY<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+   <p>可以单独定义一个文件&#xff0c;也可以定义在其他类的文件中。</p>
+   <h2><a id="22__42"></a>2.2. 枚举特性–定义实例变量、实例代码块、实例方法和构造方法</h2>
+   <p>在枚举中可以定义自己的构造方法&#xff0c;有参数无参数都可以&#xff0c;例如</p>
+   <pre><code class="prism language-java"><span class="token comment">//定义功课的枚举&#xff0c;每一门功课都有一个老师&#xff0c;通过构造方法传入</span>
+<span class="token keyword">public</span> <span class="token keyword">enum</span> Subject <span class="token punctuation">{<!-- --></span>
+    <span class="token function">CHINESE</span><span class="token punctuation">(</span><span class="token string">&#34;王老师&#34;</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">MATH</span><span class="token punctuation">(</span><span class="token string">&#34;张老师&#34;</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">ENGLISH</span><span class="token punctuation">(</span><span class="token string">&#34;Mr. Yang&#34;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">private</span> String teacherName<span class="token punctuation">;</span>
+
+ 	<span class="token comment">//枚举的构造方法访问权限默认是私有的&#xff0c;因为枚举是常量&#xff0c;各个枚举常量&#xff0c;枚举值的个数在编译期间就定义好了的&#xff0c;在运行时不能被改变</span>
+    <span class="token keyword">private</span> <span class="token function">Subject</span><span class="token punctuation">(</span>String teacherName<span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>teacherName <span class="token operator">!&#61;</span> null <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>teacherName<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token keyword">this</span><span class="token punctuation">.</span>teacherName <span class="token operator">&#61;</span> teacherName<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> String <span class="token function">getTeacherName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+        <span class="token keyword">return</span> teacherName<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setTeacherName</span><span class="token punctuation">(</span>String teacherName<span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>teacherName <span class="token operator">&#61;</span> teacherName<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+	<span class="token comment">//实例代码块</span>
+    <span class="token punctuation">{<!-- --></span>
+        teacherName <span class="token operator">&#61;</span> <span class="token string">&#34;未知&#34;</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+   <p>注意点&#xff1a;</p>
+   <ul>
+    <li>枚举的构造方法访问权限是私有的&#xff0c;否则不会通过编译</li>
+    <li>如果构造方法有参数&#xff0c;每一个枚举值需要提供参数的值&#xff0c;具体为什么&#xff0c;后面会讲解</li>
+   </ul>
+   <h2><a id="23__77"></a>2.3. 枚举特性–定义静态变量、静态代码块以及静态方法</h2>
+   <p>这个就不做举例了&#xff0c;大家可以自己验证。</p>
+   <h2><a id="24__79"></a>2.4. 枚举特性–枚举不能继承其他类或枚举&#xff0c;也不可以被继承&#xff0c;但是可以实现接口</h2>
+   <p>具体为什么不能被继承或继承其他类&#xff0c;后面解释</p>
+   <h2><a id="25_switch_81"></a>2.5. 枚举特性–可以用作switch语句</h2>
+   <p>在JDK1.7以后&#xff0c;可以在switch中使用枚举&#xff0c;使用时&#xff0c;case语句中不能使用<code>枚举类型名称.枚举值的方式&#xff0c;编译不会通过</code>&#xff0c;例如&#xff1a;<br />
+    <img src="https://img-blog.csdnimg.cn/20210228174335609.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM3Njg0NDY3,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><br /> 直接写枚举常量的名称即可。</p>
+   <h2><a id="26_enum_85"></a>2.6. 枚举特性–enum不可以作为数据类型</h2>
+   <p>enum实质上是java编译器的语法糖&#xff0c;他不是一种数据类型&#xff0c;因此定义变量&#xff0c;函数形参定义&#xff0c;不可以用它做数据类型表示&#xff1b;<br />
+    <img src="https://img-blog.csdnimg.cn/20210228174741505.png#pic_center" alt="在这里插入图片描述" /><br /> 其实所有的枚举都是继承一个<code>java.lang.Enum</code>抽象类的&#xff0c;所以枚举是类类型&#xff0c;不是一个新的类型&#xff0c;
+   </p>
+   <blockquote>
+    <p>/**<br /> This is the common base class of all Java language enumeration types.<br /> …<br /> */<br /> public abstract class Enum&lt;E extends Enum&gt;implements Comparable, Serializable {
+     <!-- --><br /> …</p>
+   </blockquote>
+   <h2><a id="27_enum_96"></a>2.7. 枚举特性–enum可以声明抽象方法</h2>
+   <pre><code class="prism language-java"><span class="token keyword">public</span> <span class="token keyword">enum</span> Subject <span class="token punctuation">{<!-- --></span>
+    <span class="token function">CHINESE</span><span class="token punctuation">(</span><span class="token string">&#34;王老师&#34;</span><span class="token punctuation">)</span><span class="token punctuation">{<!-- --></span>
+        <span class="token annotation punctuation">&#64;Override</span>
+        <span class="token keyword">int</span> <span class="token function">score</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+            <span class="token keyword">return</span> <span class="token number">80</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token function">MATH</span><span class="token punctuation">(</span><span class="token string">&#34;张老师&#34;</span><span class="token punctuation">)</span><span class="token punctuation">{<!-- --></span>
+        <span class="token annotation punctuation">&#64;Override</span>
+        <span class="token keyword">int</span> <span class="token function">score</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+            <span class="token keyword">return</span> <span class="token number">100</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token function">ENGLISH</span><span class="token punctuation">(</span><span class="token string">&#34;Mr. Yang&#34;</span><span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+        <span class="token annotation punctuation">&#64;Override</span>
+        <span class="token keyword">int</span> <span class="token function">score</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+            <span class="token keyword">return</span> <span class="token number">50</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">private</span> String teacherName<span class="token punctuation">;</span>
+
+    <span class="token keyword">private</span> <span class="token function">Subject</span><span class="token punctuation">(</span>String teacherName<span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>teacherName <span class="token operator">!&#61;</span> null <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>teacherName<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token keyword">this</span><span class="token punctuation">.</span>teacherName <span class="token operator">&#61;</span> teacherName<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token punctuation">{<!-- --></span>
+        teacherName <span class="token operator">&#61;</span> <span class="token string">&#34;未知&#34;</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">abstract</span> <span class="token keyword">int</span> <span class="token function">score</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+   <p>定义抽象方法时&#xff0c;每一个枚举常量实现该抽象方法</p>
+   <h2><a id="28__134"></a>2.8. 枚举的常用方法</h2>
+   <ul>
+    <li>name()&#xff0c;是一个实例方法&#xff0c;该方法在<code>java.lang.Enum</code>中&#xff0c;返回枚举的名称&#xff0c;枚举的名称就是定义枚举常量时用的字符串&#xff0c;该方法被final修饰&#xff0c;因此不能被重写
+    </li>
+    <li>values()&#xff0c;是一个静态方法&#xff0c;按照声明的顺序返回枚举类中定义的所有枚举常量组成的数组<br />
+     <img src="https://img-blog.csdnimg.cn/20210228180454269.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM3Njg0NDY3,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><br /> 这个方法是一个隐含的方法&#xff0c;由编译器生成的。</li>
+    <li>valueOf(String)&#xff0c;是一个静态方法&#xff0c;它根据一个名称返回一个枚举常量&#xff0c;<br />
+     <img src="https://img-blog.csdnimg.cn/20210228181422122.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM3Njg0NDY3,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><br /> 如果名称所表示的枚举常量不存在&#xff0c;则抛出<code>java.lang.IllegalArgumentException</code>异常。这个方法是一个隐含的方法&#xff0c;由编译器生成的&#xff0c;对于一个具体的枚举类来说&#xff0c;这个方法是有的&#xff0c;但是<code>java.lang.Enum</code>中没有这个方法。
+    </li>
+    <li>valueOf(Class,String),是一个静态的方法&#xff0c;存在于<code>java.lang.Enum</code>中&#xff0c;它的作用跟上一个方法类似&#xff0c;只不过第一个参数是Class类型的&#xff0c;需要指定获取那个类型的常量&#xff0c;第二个参数是常量的名称。
+    </li>
+    <li>getDeclaringClass()
+     &#xff0c;是一个实例方法&#xff0c;存在于<code>java.lang.Enum</code>中&#xff0c;可以获取代表当前枚举类型的Class对象&#xff0c;被final关键字修饰&#xff0c;不能被重写
+    </li>
+    <li>ordinal()&#xff0c;是一个实例方法&#xff0c;返回当前枚举常量的序号&#xff0c;序号是在枚举类中声明的顺序&#xff0c;从0开始&#xff0c;最大值是<code>java.lang.Integer.MAX_VALUE</code>&#xff0c;被final关键字修饰&#xff0c;不能被重写
+    </li>
+    <li>toString()&#xff0c;是一个实例方法&#xff0c;来自于<code>java.lang.Object</code>&#xff0c;在<code>java.lang.Enum</code>的实现是直接返回了name属性&#xff0c;就是name()方法的返回值&#xff0c;这个方法可以被重写。
+    </li>
+    <li>compareTo(E)
+     是一个实例方法&#xff0c;<code>java.lang.Enum</code>类实现了Comparable接口&#xff0c;用于比较当前枚举实例和指定的枚举实例&#xff0c;可以看一下它的实现<br />
+     <img src="https://img-blog.csdnimg.cn/20210301120435116.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM3Njg0NDY3,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><br /> 这是在JDK1.8中的实现版本&#xff0c;如果两个枚举实例的类型都不一样&#xff0c;直接会怕抛出异常&#xff0c;否则比较的是他们的ordinal值&#xff0c;这个值是ordinal()方法的返回值&#xff0c;由于这个方法由final修饰&#xff0c;因此不能被重写。</li>
+    <li>Enum(String , int
+     )&#xff0c;这是<code>java.lang.Enum</code>类的构造方法&#xff0c;在JDK1.8中&#xff0c;它的实现是这样的&#xff1a;<br />
+     <img src="https://img-blog.csdnimg.cn/20210301120952568.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM3Njg0NDY3,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><br /> 这个方法程序员不能直接调用的&#xff0c;由编译器生成代码调用的&#xff0c;也就是说&#xff0c;编译器会为我们自定义的枚举类生成构造方法&#xff0c;在生成的构造方法中&#xff0c;调用<code>java.lang.Enum</code>类的构造方法&#xff0c;这个我们会在下面进行验证。
+    </li>
+   </ul>
+   <h2><a id="29__152"></a>2.9. 枚举的常用工具类库</h2>
+   <ul>
+    <li>
+     <p>EnumSet<br /> 这是个抽象类&#xff0c;是枚举专用的Set接口的抽象实现&#xff0c;通过查看其add方法发现&#xff0c;它不允许null值&#xff0c;否则会抛出空指针异常&#xff0c;获取它的对象一般有如下几种静态工厂方法&#xff1a;</p>
+     <ol>
+      <li>EnumSet noneOf(Class elementType)
+       &#xff0c;根据elementType类型创建一个空的Set集合&#xff0c;如果传的Class类型不是枚举&#xff0c;就会抛出类转换异常
+      </li>
+      <li>EnumSet allOf(Class
+       elementType)&#xff0c;根据elementType类型创建一个包含elementType所有枚举常量的Set集合&#xff0c;如果传的Class类型不是枚举&#xff0c;就会抛出类转换异常
+      </li>
+      <li>EnumSet range(E from, E
+       to)&#xff0c;返回一个包含ordinal值从from.ordinal()到to.ordinal()的所有枚举常量的Set集合&#xff08;包括from和to&#xff09;&#xff0c;如果from.ordinal()大于to.ordinal()&#xff0c;则抛出<code>IllegalArgumentException</code>异常
+      </li>
+      <li>EnumSet complementOf(EnumSet
+       s)&#xff0c;返回的是所有E类型中不包含在s中的枚举常量的Set集合(补集)&#xff0c;s不能为null</li>
+      <li>EnumSet of(E
+       e)&#xff0c;返回一个Set集合包含e&#xff0c;当然这个e不能为null&#xff0c;否则抛出空指针异常&#xff0c;这个方法有5个重载的版本&#xff0c;分别可以传1-5个Enum参数
+      </li>
+      <li>EnumSet of(E first, E… rest) 这是上个方法的可变参数版本</li>
+      <li>EnumSet copyOf(EnumSet
+       s)&#xff0c;创建一个包含s中所有元素的副本&#xff0c;调用clone方法实现的</li>
+      <li>EnumSet copyOf(Collection
+       c)&#xff0c;创建一个包含c中所有枚举实例的Set&#xff0c;c不能为空集合&#xff0c;否则抛出<code>IllegalArgumentException</code>异常
+      </li>
+     </ol>
+     <p>除了这些工厂方法之外&#xff0c;还有基本的add&#xff0c;addAll&#xff0c;remove&#xff0c;removeAll&#xff0c;contains&#xff0c;containsAll<br /> &#xff0c;clear&#xff0c;equals等基本方法&#xff0c;就不一一介绍了&#xff0c;值得注意的是&#xff0c;EnumSet的实现类存储Enum对象的方式是采用一个long类型的整数存储的&#xff0c;使用位运算&#xff0c;基本操作在常数时间内完成&#xff0c;效率很高&#xff0c;有兴趣的同学可以去看一下EnumSet的源码。</p>
+    </li>
+    <li>
+     <p>EnumMap&lt;K extends Enum,
+      V&gt;<br /> 这是一个Key类型是枚举的特定Map接口实现&#xff0c;不允许null Key&#xff0c;但允许null值&#xff0c;线程不安全的。获取这个类的对象可以直接使用其构造方法&#xff1a;</p>
+     <ol>
+      <li>public EnumMap(Class keyType)
+       keyType显然必须是枚举类类型&#xff0c;返回一个空的Map集合</li>
+      <li>public EnumMap(EnumMap&lt;K, ? extends V&gt; m)
+       传入一个EnumMap实例&#xff0c;返回一个副本</li>
+     </ol>
+    </li>
+   </ul>
+   <p>其他增删改查的方法跟HashMap基本是一样的&#xff0c;EnumMap把Key和Value都使用数组的方式管理起来&#xff0c;根据Key的ordinal序号&#xff0c;作为Value数组的下表来访问Key对应的值&#xff0c;实现很简洁&#xff0c;效率很高。
+   </p>
+   <h1><a id="3__172"></a>3. 枚举的实现原理</h1>
+   <p>先从简单的来&#xff0c;我现在把我们上面使用的Subject枚举类改成下面的样子&#xff1a;</p>
+   <pre><code class="prism language-java"><span class="token keyword">public</span> <span class="token keyword">enum</span> Subject <span class="token punctuation">{<!-- --></span>
+    CHINESE<span class="token punctuation">,</span>
+    MATH<span class="token punctuation">,</span>
+    ENGLISH<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+   <p>切换到class所在的目录&#xff0c;然后&#xff1a;</p>
+   <pre><code class="prism language-powershell">javap <span class="token operator">-</span>c Subject<span class="token punctuation">.</span><span class="token keyword">class</span>
+</code></pre>
+   <p>javap是JDK自带的反汇编工具&#xff0c;得到下面的结果&#xff1a;</p>
+   <pre><code class="prism language-powershell">Compiled <span class="token keyword">from</span> <span class="token string">&#34;Subject.java&#34;</span>
+public final <span class="token keyword">class</span> com<span class="token punctuation">.</span>victory<span class="token punctuation">.</span>test<span class="token punctuation">.</span>object_size<span class="token punctuation">.</span>Subject extends java<span class="token punctuation">.</span>lang<span class="token punctuation">.</span>Enum&lt;com<span class="token punctuation">.</span>victory<span class="token punctuation">.</span>test<span class="token punctuation">.</span>object_size<span class="token punctuation">.</span>Subject&gt; <span class="token punctuation">{<!-- --></span>
+  public static final com<span class="token punctuation">.</span>victory<span class="token punctuation">.</span>test<span class="token punctuation">.</span>object_size<span class="token punctuation">.</span>Subject CHINESE<span class="token punctuation">;</span>
+
+  public static final com<span class="token punctuation">.</span>victory<span class="token punctuation">.</span>test<span class="token punctuation">.</span>object_size<span class="token punctuation">.</span>Subject MATH<span class="token punctuation">;</span>
+
+  public static final com<span class="token punctuation">.</span>victory<span class="token punctuation">.</span>test<span class="token punctuation">.</span>object_size<span class="token punctuation">.</span>Subject ENGLISH<span class="token punctuation">;</span>
+
+  public static com<span class="token punctuation">.</span>victory<span class="token punctuation">.</span>test<span class="token punctuation">.</span>object_size<span class="token punctuation">.</span>Subject<span class="token punctuation">[</span><span class="token punctuation">]</span> values<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    Code:
+       0: getstatic     <span class="token comment">#1                  // Field $VALUES:[Lcom/victory/test/object_size/Subject;</span>
+       3: invokevirtual <span class="token comment">#2                  // Method &#34;[Lcom/victory/test/object_size/Subject;&#34;.clone:()Ljava/lang/Object;</span>
+       6: checkcast     <span class="token comment">#3                  // class &#34;[Lcom/victory/test/object_size/Subject;&#34;</span>
+       9: areturn
+
+  public static com<span class="token punctuation">.</span>victory<span class="token punctuation">.</span>test<span class="token punctuation">.</span>object_size<span class="token punctuation">.</span>Subject valueOf<span class="token punctuation">(</span>java<span class="token punctuation">.</span>lang<span class="token punctuation">.</span>String<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    Code:
+       0: ldc           <span class="token comment">#4                  // class com/victory/test/object_size/Subject</span>
+       2: aload_0
+       3: invokestatic  <span class="token comment">#5                  // Method java/lang/Enum.valueOf:(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;</span>
+       6: checkcast     <span class="token comment">#4                  // class com/victory/test/object_size/Subject</span>
+       9: areturn
+
+  static <span class="token punctuation">{<!-- --></span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    Code:
+       0: new           <span class="token comment">#4                  // class com/victory/test/object_size/Subject</span>
+       3: dup
+       4: ldc           <span class="token comment">#7                  // String CHINESE</span>
+       6: iconst_0
+       7: invokespecial <span class="token comment">#8                  // Method &#34;&lt;init&gt;&#34;:(Ljava/lang/String;I)V</span>
+      10: putstatic     <span class="token comment">#9                  // Field CHINESE:Lcom/victory/test/object_size/Subject;</span>
+      13: new           <span class="token comment">#4                  // class com/victory/test/object_size/Subject</span>
+      16: dup
+      17: ldc           <span class="token comment">#10                 // String MATH</span>
+      19: iconst_1
+      20: invokespecial <span class="token comment">#8                  // Method &#34;&lt;init&gt;&#34;:(Ljava/lang/String;I)V</span>
+      23: putstatic     <span class="token comment">#11                 // Field MATH:Lcom/victory/test/object_size/Subject;</span>
+      26: new           <span class="token comment">#4                  // class com/victory/test/object_size/Subject</span>
+      29: dup
+      30: ldc           <span class="token comment">#12                 // String ENGLISH</span>
+      32: iconst_2
+      33: invokespecial <span class="token comment">#8                  // Method &#34;&lt;init&gt;&#34;:(Ljava/lang/String;I)V</span>
+      36: putstatic     <span class="token comment">#13                 // Field ENGLISH:Lcom/victory/test/object_size/Subject;</span>
+      39: iconst_3
+      40: anewarray     <span class="token comment">#4                  // class com/victory/test/object_size/Subject</span>
+      43: dup
+      44: iconst_0
+      45: getstatic     <span class="token comment">#9                  // Field CHINESE:Lcom/victory/test/object_size/Subject;</span>
+      48: aastore
+      49: dup
+      50: iconst_1
+      51: getstatic     <span class="token comment">#11                 // Field MATH:Lcom/victory/test/object_size/Subject;</span>
+      54: aastore
+      55: dup
+      56: iconst_2
+      57: getstatic     <span class="token comment">#13                 // Field ENGLISH:Lcom/victory/test/object_size/Subject;</span>
+      60: aastore
+      61: putstatic     <span class="token comment">#1                  // Field $VALUES:[Lcom/victory/test/object_size/Subject;</span>
+      64: <span class="token keyword">return</span>
+<span class="token punctuation">}</span>
+</code></pre>
+   <p>解释&#xff1a;</p>
+   <ul>
+    <li>当我们使用enum关键字定义枚举类时&#xff0c;java编译器会自动帮我们生成一个类&#xff0c;继承自<code>java.lang.Enum</code>&#xff0c;&#xff08;见第2行&#xff09;并且生成的这个类是用final修饰的&#xff0c;因此枚举不能被继承&#xff0c;也不能继承其他类了&#xff0c;但是可以实现接口
+    </li>
+    <li>我们声明的每一个枚举常量&#xff0c;都是Subject类的一个实例&#xff08;见第3&#xff0c;5&#xff0c;7行&#xff09;
+    </li>
+    <li>第9行和第16行是编译器生成的values()&#xff0c;valueOf(String)静态方法</li>
+    <li>第24行是编译器插入的静态代码块&#xff0c;后面是静态代码块的JVM指令&#xff0c;举例分析一下
+     <ul>
+      <li>第26行是使用new指令创建了一个Subject类的一个对象&#xff0c;</li>
+      <li>28行 ldc #7是把常量池中7号位置的常量压入操作数栈&#xff0c;即把CHINESE这个字符串的引用压入操作数栈</li>
+      <li>第29行&#xff0c;iconst_0指令是把数字0压入操作数栈</li>
+      <li>第30行invokespecial
+       是方法调用指令&#xff0c;可以看出&#xff0c;调用的是Subject类的&lt;init&gt;方法&#xff0c;&lt;init&gt;方法也就是构造方法&#xff0c;参数是(Ljava/lang/String;I)V&#xff0c;即一个String&#xff0c;一个整数&#xff0c;返回void。这个方法是编译器生成的&#xff0c;invokespecial
+       指令会把操作数栈的栈顶三个操作数依次弹出&#xff0c;然后执行init方法&#xff0c;通过分析我们知道依次弹出的是0&#xff0c;CHINESE&#xff0c;new出来的Subject类的对象的引用&#xff0c;<strong>其实这个0就是序号&#xff0c;即上面所说的ordinal()方法的返回值。</strong>
+      </li>
+      <li>对于Subject类的构造方法&#xff0c;通过jclasslib等字节码分析工具&#xff0c;可以看到其方法签名如下&#xff1a;<br />
+       <img src="https://img-blog.csdnimg.cn/20210301122456992.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM3Njg0NDY3,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><br /> 其字节码指令如下&#xff1a;
+       <img src="https://img-blog.csdnimg.cn/2021030112182794.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM3Njg0NDY3,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><br /> java的每一个函数都有一个局部变量表&#xff0c;对于实例方法&#xff0c;局部变量表中第一个槽位放置的是当前对象的引用this&#xff0c;后面放置的依次是各个形参的引用&#xff0c;当调用方法的时候&#xff0c;形参引用的值被替换成实际的引用&#xff1b;<br /> aload_0是把局部变量表的第一个槽位的值放到操作数栈&#xff0c;就是this&#xff0c;<br /> aload_1是把局部变量表的第二个槽位的值放到操作数栈&#xff0c;就是String参数的引用&#xff0c;这个引用就是前面我们看到的枚举常量的名称&#xff0c;<br /> iload_2把局部变量表的第三个槽位的整数值放到操作数栈&#xff0c;就是序号&#xff0c;ordinal&#xff0c;<br /> invokespecial就是调用<code>java.lang.Enum</code>的init方法&#xff0c;即父类的构造方法&#xff0c;在这里我们验证了前面我们所说的<strong>编译器生成自定义枚举类的构造方法&#xff0c;并调用了<code>java.lang.Enum</code>类的构造方法</strong>。对于JVM指令不太了解的同学可以移步查看Oracle官方文档&#xff1a;<a
+               href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-6.html">JVM指令集参考</a>
+      </li>
+     </ul>
+    </li>
+    <li>从第28行到第30行&#xff0c;是创建一个对象的过程&#xff0c;可以看出&#xff0c;在静态代码块中这样的过程执行了3次&#xff0c;<strong>也就是说&#xff0c;有几个枚举常量&#xff0c;就会调用几次枚举类的构造方法</strong>
+    </li>
+    <li>如果自己定义了构造方法&#xff0c;例如在Subject类中做如下改动&#xff0c;</li>
+   </ul>
+   <pre><code class="prism language-java"><span class="token keyword">public</span> <span class="token keyword">enum</span> Subject <span class="token punctuation">{<!-- --></span>
+    <span class="token function">CHINESE</span><span class="token punctuation">(</span><span class="token string">&#34;王老师&#34;</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">MATH</span><span class="token punctuation">(</span><span class="token string">&#34;张老师&#34;</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">ENGLISH</span><span class="token punctuation">(</span><span class="token string">&#34;Mr. Yang&#34;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">private</span> String teacherName<span class="token punctuation">;</span>
+    <span class="token function">Subject</span><span class="token punctuation">(</span>String teacherName<span class="token punctuation">)</span><span class="token punctuation">{<!-- --></span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>teacherName<span class="token operator">&#61;</span>teacherName<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+   <p>再次编译&#xff0c;反汇编&#xff0c;看到的构造函数如下&#xff1a;<br />
+    <img src="https://img-blog.csdnimg.cn/20210228200230695.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM3Njg0NDY3,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" /><br /> 可以看到&#xff0c;编译器会把自己定义的参数&#xff0c;加在原来的构造方法后面。</p>
+   <ul>
+    <li>对于含有抽象方法的情况&#xff0c;例如改成这样:</li>
+   </ul>
+   <pre><code class="prism language-java"><span class="token keyword">public</span> <span class="token keyword">enum</span> Subject <span class="token punctuation">{<!-- --></span>
+    <span class="token function">CHINESE</span><span class="token punctuation">(</span><span class="token string">&#34;王老师&#34;</span><span class="token punctuation">)</span><span class="token punctuation">{<!-- --></span>
+        <span class="token annotation punctuation">&#64;Override</span>
+        <span class="token keyword">int</span> <span class="token function">score</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+            <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token function">MATH</span><span class="token punctuation">(</span><span class="token string">&#34;张老师&#34;</span><span class="token punctuation">)</span><span class="token punctuation">{<!-- --></span>
+        <span class="token annotation punctuation">&#64;Override</span>
+        <span class="token keyword">int</span> <span class="token function">score</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+            <span class="token keyword">return</span> <span class="token number">2</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token function">ENGLISH</span><span class="token punctuation">(</span><span class="token string">&#34;Mr. Yang&#34;</span><span class="token punctuation">)</span><span class="token punctuation">{<!-- --></span>
+        <span class="token annotation punctuation">&#64;Override</span>
+        <span class="token keyword">int</span> <span class="token function">score</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+            <span class="token keyword">return</span> <span class="token number">3</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">private</span> String teacherName<span class="token punctuation">;</span>
+    <span class="token function">Subject</span><span class="token punctuation">(</span>String teacherName<span class="token punctuation">)</span><span class="token punctuation">{<!-- --></span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>teacherName<span class="token operator">&#61;</span>teacherName<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">abstract</span> <span class="token keyword">int</span> <span class="token function">score</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+   <p>有几个枚举常量&#xff0c;会生成几个Subject的内部类&#xff0c;<br />
+    <img src="https://img-blog.csdnimg.cn/20210228200928690.png#pic_center" alt="在这里插入图片描述" /><br /> 而Subject是一个继承了<code>java.lang.Enum</code>的抽象类&#xff0c;每一个内部类都继承自Subject&#xff0c;有兴趣的读者可以自己去验证。<br /> 最后值得一提的是枚举有很好的安全性&#xff0c;<strong>由于枚举在编译期间就确定了枚举常量的个数&#xff0c;因此JDK保证在运行时不能创建枚举对象&#xff0c;即使是使用反射&#xff0c;序列化和反序列化等手段也不行</strong>&#xff0c;因此枚举可以在某些要求安全性高的地方用作单例模式的实现方案。
+   </p>
+   <p>到这里有关Java枚举的内容就总结完成了&#xff0c;你学会了吗&#xff1f;如果有什么遗漏或错误&#xff0c;欢迎各位大神不吝赐教。</p>
+   <h1><a id="4__323"></a>4. 参考文章</h1>
+   <p><a
+           href="https://www.cnblogs.com/alter888/p/9163612.html">深入理解Java枚举类型(enum)</a>
+   </p>
+  </div>
+  <link
+          href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-d7a94ec6ab.css"
+          rel="stylesheet">
+  <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-a0c38f4093.css"
+        rel="stylesheet">
+ </div>
+</article>

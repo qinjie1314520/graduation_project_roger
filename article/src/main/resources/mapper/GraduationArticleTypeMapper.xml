@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.article.mapper.GraduationArticleTypeMapper">
+    <!--查询文章类型树，二层-->
+    <select id="selectArticleTypePrograma" resultMap="selectArticleTypePrograma">
+        select a.name as aName,a.id as aId,b.name as bName,b.id as bId from graduation_article_type a,graduation_article_type b
+        where a.id = b.pid and a.status = 1
+    </select>
+    <resultMap id="selectArticleTypePrograma" type="com.controller.pojo.NameAndValueAndChildren">
+        <result property="name" column="aName"/>
+        <result property="value" column="aId"/>
+        <collection property="children" ofType="com.controller.pojo.NameAndValue">
+            <result property="name" column="bName"/>
+            <result property="value" column="bId"/>
+        </collection>
+    </resultMap>
+
+    <!--通过文章ids查询文章的一些信息，映射成 id - 》 {id:?,?:?}.这里主要查询类型和浏览量-->
+    <select id="selectArticlesByLayerAndBlogIds" resultType="java.util.Map">
+        select graduation_article.id, graduation_article.viewing_times, graduation_article_type.name from graduation_article,graduation_article_type_relationship,graduation_article_type
+        where graduation_article.id = graduation_article_type_relationship.article_id
+        and graduation_article_type_relationship.article_type_id = graduation_article_type.id
+        and layer = #{layer}
+        <foreach collection="ids" item="item" separator="," open=" and graduation_article.id in (" close=" ) ">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

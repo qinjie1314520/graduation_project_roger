@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.article.mapper.GraduationUserCollectMapper">
+    <!--列表数据处理——查询博客列表的数据是否被当前用户收藏，如果用户登录了-->
+    <select id="selectCollectBlogIdsByBlogIds" resultType="Long">
+        select blog_id from graduation_user_collect
+        <where>
+            <if test="userId!=null">
+                user_id = #{userId}
+            </if>
+            <if test="ids!=null">
+                <foreach collection="ids" item="item" separator="," open=" and blog_id in (" close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+</mapper>
